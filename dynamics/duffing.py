@@ -58,7 +58,7 @@ def dynamics_duff(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
             
             if unc_type == 'constant':
                 amp_c = amp_c
-            elif unc_type == 'sinosoidal':
+            elif unc_type == 'sinusoidal':
                 amp_c = amp_c*np.sin(0.25*np.pi*(j*dt))
             elif unc_type == 'none':
                 amp_c = 0
