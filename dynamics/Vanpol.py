@@ -7,6 +7,15 @@ def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
     c = dyn_pars['c']
     d = dyn_pars['d']
     
+    del_a = dyn_pars['del_a']
+    del_b = dyn_pars['del_b']
+    del_c = dyn_pars['del_c']
+    del_d = dyn_pars['del_d']
+    
+    unc_type = dyn_pars['cont_unc_type']
+    delay = dyn_pars['delay']
+    delay_time = dyn_pars['delay_time']
+    
     # data matricies for state and data
     X_cor = np.empty((num_traj,num_snaps+1,num_states))
     X_incor = np.empty((num_traj,num_snaps+1,num_states)) 
@@ -30,8 +39,34 @@ def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
             # for incomplete dynamics take out the x1 term
             U[i,j,:] = 0.5*(2*np.random.rand(1) - 1)
             
+            if delay == True:
+                if delay_time > dt*j:
+                    amp_a = 0
+                    amp_b = 0
+                    amp_c = 0
+                    amp_d = 0
+                else:
+                    amp_a = del_a
+                    amp_b = del_b
+                    amp_c = del_c
+                    amp_d = del_d
+            else:
+                amp_a = del_a
+                amp_b = del_b
+                amp_c = del_c
+                amp_d = del_d
+            
+            
+            if unc_type == 'constant':
+                amp_c = amp_c
+            elif unc_type == 'sinusoidal':
+                amp_c = amp_c*np.sin(0.25*np.pi*(j*dt))
+            elif unc_type == 'none':
+                amp_c = 0
             # dynamics update
-            x2_dot_cor = -a*X_cor[i,j,0] - b*X_cor[i,j,1] - c*U[i,j,:] -d*(X_cor[i,j,1]**2)*X_cor[i,j,1]
+            
+            # dynamics update
+            x2_dot_cor = -(a+amp_a)*X_cor[i,j,0] - (b+amp_b)*X_cor[i,j,1] - (c+amp_c)*U[i,j,:] -(d+amp_d)*(X_cor[i,j,1]**2)*X_cor[i,j,1]
             x2_dot_incor = -a*X_incor[i,j,0] - 0*b*X_incor[i,j,1] - c*U[i,j,:] -d*(X_incor[i,j,1]**2)*X_incor[i,j,1]
             
             # State update
