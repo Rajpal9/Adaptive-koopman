@@ -33,10 +33,18 @@ class AdaptNet(nn.Module):
 
         # create the linear layer to move the states one step ahead
         self.del_A = nn.Linear(self.n_tot, self.n_tot-first_obs_const, bias = False)
-        nn.init.zeros_(self.del_A.weight)
+        
         # actuation
         self.del_B = nn.Linear(m*self.n_tot, self.n_tot-first_obs_const, bias = False)
-        nn.init.zeros_(self.del_B.weight)
+        if self.adapt_net_params['warm_start'] == True:
+            del_A_prev = torch.from_numpy(self.adapt_net_params['del_A_prev'][int(first_obs_const):,:])
+            del_B_prev = torch.from_numpy(self.adapt_net_params['del_B_prev'][int(first_obs_const):,:])
+            self.del_A.weight = nn.Parameter(del_A_prev)
+            self.del_B.weight = nn.Parameter(del_B_prev)
+        
+        else:
+            nn.init.zeros_(self.del_A.weight)
+            nn.init.zeros_(self.del_B.weight)
 
 
     def forward(self, data):
