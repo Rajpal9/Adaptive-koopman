@@ -72,8 +72,9 @@ class AdaptNet(nn.Module):
 
     def loss(self, outputs, labels):
         alpha = self.adapt_net_params['l1_reg']
+        beta = self.adapt_net_params['l2_reg']
         criterion = nn.MSELoss()
-        loss = criterion(outputs, labels) + alpha * torch.norm(self.del_A_matrix, p=1) + alpha * torch.norm(self.del_B_matrix, p=1)
+        loss = criterion(outputs, labels) + alpha * (torch.norm(self.del_A_matrix, p=1) + torch.norm(self.del_B_matrix, p=1))+  beta * (torch.norm(self.del_A_matrix, p=2) + torch.norm(self.del_B_matrix, p=2))
         return loss
 
 
