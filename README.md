@@ -3,5 +3,8 @@ A repository for an online adaptive Koopman algorithm
 
 
 ## Required Dependencies
-Torch
-Control
+1.Torch
+
+2.Control
+
+3. OSQP
