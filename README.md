@@ -7,4 +7,4 @@ A repository for an online adaptive Koopman algorithm
 
 2.Control
 
-3. OSQP
+3.OSQP
