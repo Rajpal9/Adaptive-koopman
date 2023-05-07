@@ -84,6 +84,7 @@ class NonlinearMPCController():
 
         # Create an OSQP object and setup workspace
         self.prob = osqp.OSQP()
+        print(self._osqp_l.shape, self._osqp_A.shape)
         self.prob.setup(P=self._osqp_P, q=self._osqp_q, A=self._osqp_A, l=self._osqp_l, u=self._osqp_u, verbose=False,
                         warm_start=self.solver_settings['warm_start'],
                         polish=self.solver_settings['polish'],
