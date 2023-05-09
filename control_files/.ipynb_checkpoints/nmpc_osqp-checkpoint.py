@@ -84,7 +84,6 @@ class NonlinearMPCController():
 
         # Create an OSQP object and setup workspace
         self.prob = osqp.OSQP()
-        print(self._osqp_l.shape, self._osqp_A.shape)
         self.prob.setup(P=self._osqp_P, q=self._osqp_q, A=self._osqp_A, l=self._osqp_l, u=self._osqp_u, verbose=False,
                         warm_start=self.solver_settings['warm_start'],
                         polish=self.solver_settings['polish'],
@@ -126,14 +125,14 @@ class NonlinearMPCController():
         """
         self.xr_traj = x_ref_traj
         self.N_traj = x_ref_traj.shape[0]
-        self.x_traced = np.empty((self.N_traj+1,self.nx))
+        self.x_traced = np.empty((self.N_traj+1, self.nx))
         self.z_N0 = z0
         self.x_N0 = x0
         self.x_traced[0, :] = x0
-        self.controls = np.empty((self.N_traj,self.nu))
+        self.controls = np.empty((self.N_traj, self.nu))
 
         for i in range(self.N_traj):
-            print("time_step",i)
+            print("time_step", i)
             xr = self.xr_traj[i, :]
             self.solve_to_convergence(xr, self.z_N0, self.z_init, self.u_init, max_iter = max_iter, eps = 1e-3)
             self.update_initial_guess_()
@@ -240,8 +239,6 @@ class NonlinearMPCController():
             [(self.C.T @ self.Q @ (self.C @ self.z_init[:-1, :].T - xr.reshape(-1, 1))).flatten(order='F'),
              self.C.T @ self.QN @ (self.C @ self.z_init[-1, :] - xr),
              (self.R @ (self.u_init.T)).flatten(order='F')])
-
-        # self._osqp_P.eliminate_zeros()
 
 
     def update_objective_(self, xr):
@@ -406,7 +403,7 @@ class NonlinearMPCController():
         # print("z_init",self.z_init)
         # print("u_init",self.u_init)
         # print("x_init",self.x_init)
-        # print("res",self.r_vec)
+        # print("residual",self.r_vec)
 
         self.res = self.prob.solve()
         self.dz_flat = self.res.x[:(self.N + 1) * self.nz]

@@ -15,7 +15,7 @@ class bilinear_Dynamics:
         self.B = B
         self.C = C
         self.nz = A.shape[0]  # number of states
-        self.nx = C.shape[0]
+        self.nx = C.shape[0]   # number of base states
         self.m = int(B.shape[1]/self.nz)  #number of control signals
 
     def eval_dot(self, z, u, t = None):
