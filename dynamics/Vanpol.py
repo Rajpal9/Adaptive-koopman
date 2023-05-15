@@ -1,6 +1,21 @@
 ## dynamics of vanderpol with correct and incorrect terms
 import numpy as np
-def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
+
+def dynamics_vanpol(dt, x, x_dot, u, pars):
+    a = pars['a']
+    b = pars['b']
+    c = pars['c']
+    d = pars['d']
+    
+    x_ddot = -a*x - b*x_dot - c*u - d*(x**2)*x_dot
+    
+    x_dot_next = x_dot + x_ddot*dt
+    x_next = x + x_dot*dt + (1/2)*(x_ddot)*(dt**2)
+    
+    return x_ddot, x_dot_next, x_next
+    
+
+def dynamics_vanpol_data_gen(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
     # Here the dyanmics will be missing one of the terms
     a = dyn_pars['a']
     b = dyn_pars['b']
@@ -21,6 +36,9 @@ def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
     X_incor = np.empty((num_traj,num_snaps+1,num_states)) 
     U = np.empty((num_traj,num_snaps,num_inputs))
     
+    pars_cor = {}
+    pars_incor = {}
+
     for i in range(num_traj):
         # Initialize matrix for each trajectory
         
@@ -34,7 +52,7 @@ def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
         
         for j in range(num_snaps):
             # actual dyanmic
-            # x1_dot = b*x2
+            # x1_dot = x2
             # x2_dot = -ax1 - bx2  - cu - d(x1**2)*x2 
             # for incomplete dynamics take out the x1 term
             U[i,j,:] = 0.5*(2*np.random.rand(1) - 1)
@@ -63,18 +81,21 @@ def dynamics_vanpol(dt, num_traj, num_snaps,num_states, num_inputs, dyn_pars):
                 amp_c = amp_c*np.sin(0.25*np.pi*(j*dt))
             elif unc_type == 'none':
                 amp_c = 0
-            # dynamics update
             
-            # dynamics update
-            x2_dot_cor = -(a+amp_a)*X_cor[i,j,0] - (b+amp_b)*X_cor[i,j,1] - (c+amp_c)*U[i,j,:] -(d+amp_d)*(X_cor[i,j,1]**2)*X_cor[i,j,1]
-            x2_dot_incor = -a*X_incor[i,j,0] - 0*b*X_incor[i,j,1] - c*U[i,j,:] -d*(X_incor[i,j,1]**2)*X_incor[i,j,1]
             
-            # State update
-            X_cor[i,j+1,1] = X_cor[i,j,1] + x2_dot_cor*dt
-            X_cor[i,j+1,0] = X_cor[i,j,0] + X_cor[i,j,1]*dt 
+            pars_cor['a'] = a + amp_a
+            pars_cor['b'] = b + amp_b
+            pars_cor['c'] = c + amp_c
+            pars_cor['d'] = d + amp_d
             
-            X_incor[i,j+1,1] = X_incor[i,j,1] + x2_dot_incor*dt
-            X_incor[i,j+1,0] = X_incor[i,j,0] + X_incor[i,j,1]*dt 
+            pars_incor['a'] = a 
+            pars_incor['b'] = b 
+            pars_incor['c'] = c 
+            pars_incor['d'] = d 
             
+            ## state update
+            
+            _,X_cor[i,j+1,1], X_cor[i,j+1,0] = dynamics_vanpol(dt, X_cor[i,j,0], X_cor[i,j,1],U[i,j,:], pars_cor)
+            _,X_incor[i,j+1,1], X_incor[i,j+1,0] = dynamics_vanpol(dt, X_incor[i,j,0], X_incor[i,j,1],U[i,j,:], pars_incor)
             
     return X_cor, X_incor,U   
