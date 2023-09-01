@@ -5,13 +5,12 @@ def Duff_adapt(dt,x, u, num_states, dyn_pars):
     b = dyn_pars['b']
     c = dyn_pars['c']
     d = dyn_pars['d']
-    e = dyn_pars['e']
-
+    
     del_a = dyn_pars['del_a']
     del_b = dyn_pars['del_b']
     del_c = dyn_pars['del_c']
     del_d = dyn_pars['del_d']
-    del_e = dyn_pars['del_e']
+
 
     x_next_new = np.empty((num_states))
     x_next_old = np.empty((num_states))

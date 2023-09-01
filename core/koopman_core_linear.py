@@ -8,11 +8,12 @@ from torch.utils.data import random_split
 import os
 import numpy as np
 from sys import exit
+import control
 # base class for koopman net
 
-class KoopmanNet(nn.Module):
+class KoopmanNet_linear(nn.Module):
   def __init__(self, net_params, standardizer_x=None, standardizer_u=None):
-    super(KoopmanNet, self).__init__()
+    super(KoopmanNet_linear, self).__init__()
     self.net_params = net_params
     self.standardizer_x = standardizer_x
     self.standardizer_u = standardizer_u
@@ -35,17 +36,18 @@ class KoopmanNet(nn.Module):
     pass
 
   def loss(self, outputs, labels):
+    self.construct_dyn_mat()
     n = self.net_params['state_dim']
     n_z = self.net_params['encoder_output_dim']
     override_C = self.net_params['override_C']
-    
+
     #output = x_proj, x_prime_diff_pred, z_prime_diff_pred, z_prime_diff
     #ilabels =  [x,x_prime_diff]
 
     # next time step pred
     x_proj = outputs[:,:n]
     x = labels[:,:n]
-    
+
     x_prime_diff_pred = outputs[:,n:2*n]
     x_prime_diff = labels[:, n:2*n]
 
@@ -63,18 +65,19 @@ class KoopmanNet(nn.Module):
         pred_loss = criterion(x_prime_diff_pred,torch.divide(x_prime_diff,self.loss_scaler_x[:n]))
     else:
         pred_loss = criterion(x_prime_diff_pred,x_prime_diff/self.loss_scaler_z)
-        
+
 
     #proj_loss = reconstruction loss
     proj_loss = criterion(x_proj, x)
 
     #lifted state loss
     lifted_loss = criterion(z_prime_diff_pred, z_prime_diff/self.loss_scaler_z)/(n_z/n)
+
     l1_loss = 0.
     # l1 regulaization
     if 'l1_reg' in self.net_params and self.net_params['l1_reg'] > 0:
-      l1_reg = self.net_params['l1_reg']
-      l1_loss = l1_reg*self.get_l1_norm_()
+        l1_reg = self.net_params['l1_reg']
+        l1_loss = l1_reg*self.get_l1_norm_()
 
     if override_C:
         total_loss = pred_loss + alpha*lifted_loss + l1_loss
@@ -163,9 +166,9 @@ class KoopmanNet(nn.Module):
 
 # class for koopman net with control
 
-class KoopmanNetCtrl(KoopmanNet):
+class KoopmanNetCtrl_linear(KoopmanNet_linear):
     def __init__(self, net_params,standardizer_x=None, standardizer_u=None):
-        super(KoopmanNetCtrl, self).__init__(net_params,standardizer_x=standardizer_x, standardizer_u=standardizer_u)
+        super(KoopmanNetCtrl_linear, self).__init__(net_params,standardizer_x=standardizer_x, standardizer_u=standardizer_u)
 
       # define a function to contruct net
     def construct_net(self):
@@ -304,12 +307,12 @@ class KoopmanNetCtrl(KoopmanNet):
         if not override_C:
             self.C = self.projection_fc.weight.detach().numpy()
 
+
     def get_l1_norm_(self):
           return torch.norm(self.koopman_fc_drift.weight.view(-1), p=1) + torch.norm(self.koopman_fc_act.weight.view(-1), p=1)
-        
-        
 
-class KoopDNN():
+
+class KoopDNN_linear():
   "class for nn based learning"
   def __init__(self, net, first_obs_const=True, dt = None):
     self.A = None

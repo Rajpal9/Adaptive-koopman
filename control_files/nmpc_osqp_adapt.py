@@ -132,7 +132,7 @@ class NonlinearMPCController():
         self.controls = np.empty((self.N_traj,self.nu))
 
         for i in range(self.N_traj):
-            print("time_step",i)
+            # print("time_step",i)
             xr = self.xr_traj[i, :]
             self.solve_to_convergence(xr, self.z_N0, self.z_init, self.u_init, max_iter = max_iter, eps = 1e-3)
             self.update_initial_guess_()
