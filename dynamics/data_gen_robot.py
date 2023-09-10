@@ -1,0 +1,86 @@
+import numpy as np
+from dynamics.path_generator import cubic_spline_interpolation
+def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
+    
+    """
+    A function for generating the data for the given robot
+    dt = time step
+    num_traj = number of trajectories
+    num_snap = number of snaps in each trajectory
+    robot = robot
+    controller = random or model partitioning controller (controller)
+    """
+    num_states = robot.random_q().shape[0]
+    num_inputs = num_states
+    
+    if robot.name.__contains__("2D"):
+        num_states_cart = 2
+    else:
+        num_states_cart = 3
+    
+    X = np.zeros((num_traj, num_snaps, 2*num_states))
+    tau = np.zeros((num_traj, num_snaps, num_states))
+    X_end = np.zeros((num_traj, num_snaps, num_states_cart))
+    
+    
+    if controller == 'random':
+        for i in range(num_traj):
+            X[i,0,:num_states] = (np.pi/2)*(2*np.random.rand(num_states,1) - 1).reshape(num_states,);
+            X[i,0,num_states:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,);
+
+            tf = np.array(robot.fkine(X[i,0,:num_states])); #fkine(q)
+            X_end[i,0,:] = tf[:num_states_cart,3];
+            for j in range(num_snaps-1):
+                tau[i,j,:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,); #input torques
+
+                th_ddot = robot.accel(X[i,j,:num_states], X[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
+                X[i,j+1,num_states:] = th_ddot*dt + X[i,j,num_states:];
+                X[i,j+1,:num_states] = X[i,j,num_states:]*dt + X[i,j,:num_states];
+
+                tf = np.array(robot.fkine(X[i,j+1,:num_states]));
+                X_end[i,j+1,:] = tf[:num_states_cart,3];
+
+        
+    else:
+        for i in range(num_traj):
+            num_wp = 10
+            # generate path
+            t_end = dt*num_snaps; 
+            t_wp = np.zeros((num_wp,))
+            q_wp = np.zeros((num_states, num_wp))
+            for s in range(num_wp):
+                if s == 0:
+                    q_wp[:,s] = robot.random_q();
+                    t_wp[s] = 0;
+                    q_wp_dot = 0.07*(2*np.random.rand(num_states,) - 1);
+                else:
+                    t_wp[s] = s*t_end/num_wp;
+                    q_wp[:,s] = q_wp[:,s-1] + q_wp_dot*(t_wp[s]-t_wp[s-1]);
+                    q_wp_dot = 0.07*(2*np.random.rand(num_states,) - 1);
+
+
+            q_traj, qd_traj, qddot_traj = cubic_spline_interpolation(np.transpose(q_wp),t_end,num_snaps-1);
+
+            X[i,0,:num_states] = q_traj[:,0];
+            X[i,0,num_states:] = qd_traj[:,0];
+
+            tf = np.array(robot.fkine(X[i,0,:num_states])); #fkine(q)
+            X_end[i,0,:] = tf[:num_states_cart,3];
+
+            Kp = 16;
+            Kv = 8;
+            tau_dash = np.zeros((num_states,num_snaps))
+            for j in range(num_snaps-1):
+                tau_dash[:,j] = qddot_traj[:,j] + Kv*(qd_traj[:,j] - X[i,j,num_states:]) + Kp*(q_traj[:,j] - X[i,j,:num_states]);
+                tau[i,j,:] = robot.rne(X[i,j,:num_states], X[i,j,num_states:], tau_dash[:,j])
+
+                th_ddot = robot.accel(X[i,j,:num_states], X[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
+                X[i,j+1,num_states:] = th_ddot*dt + X[i,j,num_states:];
+                X[i,j+1,:num_states] = X[i,j,num_states:]*dt + X[i,j,:num_states];
+
+                tf = np.array(robot.fkine(X[i,j+1,:num_states]));
+                X_end[i,j+1,:] = tf[:num_states_cart,3];
+
+
+    
+    return X_end, X, tau
