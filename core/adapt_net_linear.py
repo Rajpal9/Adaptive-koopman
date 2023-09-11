@@ -32,11 +32,15 @@ class AdaptNet_linear(nn.Module):
             self.n_tot = int(first_obs_const) + lift_dim
 
         # create the linear layer to move the states one step ahead
+        
         self.del_A = nn.Linear(self.n_tot, self.n_tot-first_obs_const, bias = False)
-        nn.init.zeros_(self.del_A.weight)
         # actuation
         self.del_B = nn.Linear(m, self.n_tot-first_obs_const, bias = False)
+        
+        if self.adapt_net_params[]
+        nn.init.zeros_(self.del_A.weight)
         nn.init.zeros_(self.del_B.weight)
+        
 
 
     def forward(self, data):
