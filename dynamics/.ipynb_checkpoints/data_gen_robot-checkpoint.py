@@ -21,7 +21,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
     
     X = np.zeros((num_traj, num_snaps, 2*num_states))
     tau = np.zeros((num_traj, num_snaps-1, num_states))
-    X_end = np.zeros((num_traj, num_snaps, num_states_cart))
+    X_end = np.zeros((num_traj, num_snaps, 2*num_states_cart))
     
     
     if controller == 'random':
@@ -30,7 +30,9 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
             X[i,0,num_states:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,);
 
             tf = np.array(robot.fkine(X[i,0,:num_states])); #fkine(q)
+            X_end[i,0,:num_states_cart] = tf[:num_states_cart,3];
             X_end[i,0,:] = tf[:num_states_cart,3];
+            X_end[i,0,num_states_cart:] = np.matmul(robot.jacob0(X[i,0,:num_states])[:num_states_cart,:],X[i,0,num_states:].reshape(-1,))
             for j in range(num_snaps-1):
                 tau[i,j,:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,); #input torques
 
@@ -40,7 +42,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
 
                 tf = np.array(robot.fkine(X[i,j+1,:num_states]));
                 X_end[i,j+1,:] = tf[:num_states_cart,3];
-
+                X_end[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X[i,j+1,:num_states])[:num_states_cart,:],X[i,j+1,num_states:].reshape(-1,))
         
     else:
         for i in range(num_traj):
@@ -67,6 +69,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
 
             tf = np.array(robot.fkine(X[i,0,:num_states])); #fkine(q)
             X_end[i,0,:] = tf[:num_states_cart,3];
+            X_end[i,0,num_states_cart:] = np.matmul(robot.jacob0(X[i,0,:num_states])[:num_states_cart,:],X[i,0,num_states:].reshape(-1,))
 
             Kp = 16;
             Kv = 8;
@@ -81,6 +84,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
 
                 tf = np.array(robot.fkine(X[i,j+1,:num_states]));
                 X_end[i,j+1,:] = tf[:num_states_cart,3];
+                X_end[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X[i,j+1,:num_states])[:num_states_cart,:],X[i,j+1,num_states:].reshape(-1,))
 
 
     
@@ -108,8 +112,8 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
     
     X_1 = np.zeros((num_traj, num_snaps, 2*num_states))
     X_2 = np.zeros((num_traj, num_snaps, 2*num_states))
-    X_end_1 = np.zeros((num_traj, num_snaps, num_states_cart))
-    X_end_2 = np.zeros((num_traj, num_snaps, num_states_cart))
+    X_end_1 = np.zeros((num_traj, num_snaps, 2*num_states_cart))
+    X_end_2 = np.zeros((num_traj, num_snaps, 2*num_states_cart))
     tau = np.zeros((num_traj, num_snaps-1, num_states))
     
     
@@ -119,13 +123,15 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
             X_1[i,0,num_states:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,);
 
             tf_1 = np.array(robot.fkine(X_1[i,0,:num_states])); #fkine(q)
-            X_end_1[i,0,:] = tf_1[:num_states_cart,3];
+            X_end_1[i,0,:num_states_cart] = tf_1[:num_states_cart,3];
+            X_end_1[i,0,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,0,:num_states])[:num_states_cart,:],X_1[i,0,num_states:].reshape(-1,))
             
             X_2[i,0,:num_states] = X_1[i,0,:num_states];
             X_2[i,0,num_states:] = X_1[i,0,num_states:];
             
             tf_2 = np.array(robot_2.fkine(X_2[i,0,:num_states])); #fkine(q)
             X_end_2[i,0,:] = tf_2[:num_states_cart,3];
+            X_end_2[i,0,num_states_cart:] = np.matmul(robot.jacob0(X_2[i,0,:num_states])[:num_states_cart,:],X_2[i,0,num_states:].reshape(-1,))
             
             for j in range(num_snaps-1):
                 tau[i,j,:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,); #input torques
@@ -135,14 +141,17 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
                 X_1[i,j+1,:num_states] = X_1[i,j,num_states:]*dt + X_1[i,j,:num_states];
 
                 tf_1 = np.array(robot.fkine(X_1[i,j+1,:num_states]));
-                X_end_1[i,j+1,:] = tf_1[:num_states_cart,3];
-
+                X_end_1[i,j+1,:num_states_cart] = tf_1[:num_states_cart,3];
+                X_end_1[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,j+1,:num_states])[:num_states_cart,:],X_1[i,j+1,num_states:].reshape(-1,))
+                
                 th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
                 tf_2 = np.array(robot_2.fkine(X_2[i,j+1,:num_states]));
-                X_end_2[i,j+1,:] = tf_2[:num_states_cart,3];
+                X_end_2[i,j+1,:num_states_cart] = tf_2[:num_states_cart,3];
+                X_end_2[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_2[i,j+1,:num_states])[:num_states_cart,:],X_2[i,j+1,num_states:].reshape(-1,))
+                
 
         
     else:
@@ -169,13 +178,15 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
             X_1[i,0,num_states:] = qd_traj[:,0];
 
             tf_1 = np.array(robot.fkine(X_1[i,0,:num_states])); #fkine(q)
-            X_end_1[i,0,:] = tf_1[:num_states_cart,3];
+            X_end_1[i,0,:num_states_cart] = tf_1[:num_states_cart,3];
+            X_end_1[i,0,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,0,:num_states])[:num_states_cart,:],X_1[i,0,num_states:].reshape(-1,))
 
             X_2[i,0,:num_states] = X_1[i,0,:num_states];
             X_2[i,0,num_states:] = X_1[i,0,num_states:];
 
             tf_2 = np.array(robot_2.fkine(X_2[i,0,:num_states])); #fkine(q)
-            X_end_2[i,0,:] = tf_2[:num_states_cart,3];
+            X_end_2[i,0,:num_states_cart] = tf_2[:num_states_cart,3];
+            X_end_2[i,0,num_states_cart:] = np.matmul(robot.jacob0(X_2[i,0,:num_states])[:num_states_cart,:],X_2[i,0,num_states:].reshape(-1,))
 
             Kp = 16;
             Kv = 8;
@@ -190,14 +201,16 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
                 X_1[i,j+1,:num_states] = X_1[i,j,num_states:]*dt + X_1[i,j,:num_states];
 
                 tf_1 = np.array(robot.fkine(X_1[i,j+1,:num_states]));
-                X_end_1[i,j+1,:] = tf_1[:num_states_cart,3];
+                X_end_1[i,j+1,:num_states_cart] = tf_1[:num_states_cart,3];
+                X_end_1[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,j+1,:num_states])[:num_states_cart,:],X_1[i,j+1,num_states:].reshape(-1,))
 
                 th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
                 tf_2 = np.array(robot_2.fkine(X_2[i,j+1,:num_states]));
-                X_end_2[i,j+1,:] = tf_2[:num_states_cart,3];
+                X_end_2[i,j+1,:num_states_cart] = tf_2[:num_states_cart,3];
+                X_end_2[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_2[i,j+1,:num_states])[:num_states_cart,:],X_2[i,j+1,num_states:].reshape(-1,))
 
 
     
