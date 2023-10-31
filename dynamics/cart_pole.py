@@ -40,8 +40,10 @@ def cart_pole_fkine(x,pars):
     #end effector position of cartpole
     x_p = x[0] + l*np.sin(x[1])
     y_p = l*np.cos(x[1])
+    x_p_dot = l*np.cos(x[1])*x[3]
+    y_p_dot = -l*np.sin(x[1])*x[3]
     
-    x_end_eff = np.array([x_p,y_p])
+    x_end_eff = np.array([x_p,y_p,x_p_dot,y_p_dot])
     
     return x_end_eff
 
@@ -64,7 +66,7 @@ def cart_pole_data_gen(dt,num_traj,num_snaps, pars,controller):
     
     X = np.zeros((num_traj, num_snaps, 2*num_states))
     F= np.zeros((num_traj, num_snaps-1, num_inputs))
-    X_end = np.zeros((num_traj, num_snaps, num_states_cart))
+    X_end = np.zeros((num_traj, num_snaps, 2*num_states_cart))
     
     
     if controller == 'random':
@@ -145,8 +147,8 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
     X_1 = np.zeros((num_traj, num_snaps, 2*num_states))
     X_2 = np.zeros((num_traj, num_snaps, 2*num_states))
 
-    X_end_1 = np.zeros((num_traj, num_snaps, num_states_cart))
-    X_end_2 = np.zeros((num_traj, num_snaps, num_states_cart))
+    X_end_1 = np.zeros((num_traj, num_snaps, 2*num_states_cart))
+    X_end_2 = np.zeros((num_traj, num_snaps, 2*num_states_cart))
     
     F = np.zeros((num_traj, num_snaps-1, num_inputs))
     
@@ -154,23 +156,23 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
     if controller == 'random':
         for i in range(num_traj):
             X_1[i,0,0] = 2*np.random.rand(1,) - 1
-            X_1[i,0,1] = (np.pi/2)*(2*np.random.rand(1,) - 1)
-            X_1[i,0,2] = 0.1*(2*np.random.rand(1,) - 1)
+            X_1[i,0,1] = (np.pi/4)*(2*np.random.rand(1,) - 1)
+            X_1[i,0,2] = 0.01*(2*np.random.rand(1,) - 1)
             X_1[i,0,3] = 0.1*(2*np.random.rand(1,) - 1)
             
             X_2[i,0,:] = X_1[i,0,:]
             
             #fkine(q)
             X_end_1[i,0,:] = cart_pole_fkine(X_1[i,0,:], pars);
-            X_end_1[i,0,:] = cart_pole_fkine(X_1[i,0,:], pars_2);
+            X_end_2[i,0,:] = cart_pole_fkine(X_2[i,0,:], pars_2);
             for j in range(num_snaps-1):
-                F[i,j,:] = 5*(2*np.random.rand(num_inputs,1) - 1).reshape(num_inputs,); #input torques
+                F[i,j,:] = 3*(2*np.random.rand(num_inputs,1) - 1).reshape(num_inputs,); #input torques
      
                 X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], num_states, pars);
-                X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,0,:], pars);
+                X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,j+1,:], pars);
                 
                 X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], num_states, pars_2);
-                X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,0,:], pars_2);
+                X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,j+1,:], pars_2);
 
         
     else:
@@ -202,7 +204,7 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
             X_2[i,0,:] = X_1[i,0,:]
 
             X_end_1[i,0,:] = cart_pole_fkine(X_1[i,0,:], pars);
-            X_end_1[i,0,:] = cart_pole_fkine(X_2[i,0,:], pars_2);
+            X_end_2[i,0,:] = cart_pole_fkine(X_2[i,0,:], pars_2);
 
             Kp = 16;
             Kv = 8;
@@ -212,10 +214,10 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
                 F[i,j,:] =  (pars['m_p']+ pars['m_c'])*F_dash[1,j]
 
                 X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], num_states, pars);
-                X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,0,:], pars);
+                X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,j+1,:], pars);
                 
                 X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], num_states, pars_2);
-                X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,0,:], pars_2);
+                X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,j+1,:], pars_2);
 
 
 
