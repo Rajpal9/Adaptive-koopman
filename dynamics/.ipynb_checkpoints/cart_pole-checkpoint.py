@@ -2,12 +2,11 @@ import numpy as np
 
 
 
-def cart_pole_dyn(dt, x, F, num_states, pars):
+def cart_pole_dyn(dt, x, F, pars):
     """
     dt = timestep
     x = [x, theta, x_dt, theta_dt];
     F = Force Input
-    num_states = number of states
     pars = system parameters
     
     """
@@ -81,7 +80,7 @@ def cart_pole_data_gen(dt,num_traj,num_snaps, pars,controller):
             for j in range(num_snaps-1):
                 F[i,j,:] = 0.1*(2*np.random.rand(num_inputs,1) - 1).reshape(num_inputs,); #input torques
      
-                X[i,j+1,:] = cart_pole_dyn(dt, X[i,j,:], F[i,j,:], num_states, pars);
+                X[i,j+1,:] = cart_pole_dyn(dt, X[i,j,:], F[i,j,:], pars);
                 X_end[i,j+1,:] = cart_pole_fkine(X[i,0,:], pars);
 
         
@@ -120,7 +119,7 @@ def cart_pole_data_gen(dt,num_traj,num_snaps, pars,controller):
                 F_dash[:,j] = qddot_traj[:,j] + Kv*(qd_traj[:,j] - X[i,j,num_states:]) + Kp*(q_traj[:,j] - X[i,j,:num_states]);
                 F[i,j,:] =  (pars['m_p']+ pars['m_c'])*F_dash[0,j]
 
-                X[i,j+1,:] = cart_pole_dyn(dt, X[i,j,:], F[i,j,:], num_states, pars);
+                X[i,j+1,:] = cart_pole_dyn(dt, X[i,j,:], F[i,j,:], pars);
                 X_end[i,j+1,:] = cart_pole_fkine(X[i,0,:], pars);
 
 
@@ -168,10 +167,10 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
             for j in range(num_snaps-1):
                 F[i,j,:] = 3*(2*np.random.rand(num_inputs,1) - 1).reshape(num_inputs,); #input torques
      
-                X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], num_states, pars);
+                X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], pars);
                 X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,j+1,:], pars);
                 
-                X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], num_states, pars_2);
+                X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], pars_2);
                 X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,j+1,:], pars_2);
 
         
@@ -213,10 +212,10 @@ def cart_pole_data_gen_multi(dt,num_traj,num_snaps, pars, pars_2,controller):
                 F_dash[:,j] = qddot_traj[:,j] + Kv*(qd_traj[:,j] - X_1[i,j,num_states:]) + Kp*(q_traj[:,j] - X_1[i,j,:num_states]);
                 F[i,j,:] =  (pars['m_p']+ pars['m_c'])*F_dash[1,j]
 
-                X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], num_states, pars);
+                X_1[i,j+1,:] = cart_pole_dyn(dt, X_1[i,j,:], F[i,j,:], pars);
                 X_end_1[i,j+1,:] = cart_pole_fkine(X_1[i,j+1,:], pars);
                 
-                X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], num_states, pars_2);
+                X_2[i,j+1,:] = cart_pole_dyn(dt, X_2[i,j,:], F[i,j,:], pars_2);
                 X_end_2[i,j+1,:] = cart_pole_fkine(X_2[i,j+1,:], pars_2);
 
 

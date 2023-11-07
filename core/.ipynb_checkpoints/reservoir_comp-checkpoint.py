@@ -91,7 +91,7 @@ def validate_reservoir(data_info, data_val, res_info, Wout, r_end, system_info):
     ## validation
 
     val_length = data_val['num_traj']*data_info['num_snaps'];
-    u_pred = np.zeros((val_length,1));
+    u_pred = np.zeros((val_length,system_info['num_inputs']));
     taudt_threshold = np.array([-1,1]);
     tau_pred = val_y;
 
@@ -114,13 +114,13 @@ def validate_reservoir(data_info, data_val, res_info, Wout, r_end, system_info):
             if predict_value[li] - tau_pred[li, time_li] < taudt_threshold[0]*dt:
                 predict_value[li] = tau_pred[li, time_li] + taudt_threshold[0]*dt;
 
-        u_pred[t_i, :] = predict_value;
+        u_pred[t_i, :] = predict_value.reshape(system_info['num_inputs'],);
 
     ## output
 
     control_info = {}
-    control_info['u_pred'] = u_pred.reshape(-1,1);
-    control_info['u_val_flat'] = val_y.reshape(-1,1);
+    control_info['u_pred'] = u_pred.reshape(-1,system_info['num_inputs']);
+    control_info['u_val_flat'] = val_y.reshape(-1,system_info['num_inputs']);
     
     return control_info
     
