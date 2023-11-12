@@ -16,13 +16,13 @@ def data_prep(data, data_info, system_info):
     
     
     for i in range(num_traj):
-        X[:num_states,i*num_snaps:(i+1)*num_snaps] = x[i,:num_snaps,:num_states].reshape(num_states,-1);
-        X[num_states:2*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,1:,:num_states].reshape(num_states,-1);
+        X[:num_states,i*num_snaps:(i+1)*num_snaps] = x[i,:num_snaps,:num_states].T;
+        X[num_states:2*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,1:,:num_states].T;
     
-        X[2*num_states:3*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,:num_snaps,num_states:2*num_states].reshape(num_states,-1);
-        X[3*num_states:4*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,1:,num_states:2*num_states].reshape(num_states,-1);
+        X[2*num_states:3*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,:num_snaps,num_states:2*num_states].T;
+        X[3*num_states:4*num_states,i*num_snaps:(i+1)*num_snaps] = x[i,1:,num_states:2*num_states].T;
     
-        y[:,i*num_snaps:(i+1)*num_snaps] = u[i,:num_snaps,:num_inputs].reshape(num_states,-1);
+        y[:,i*num_snaps:(i+1)*num_snaps] = u[i,:num_snaps,:num_inputs].T;
     
     flat_data = {}
     
@@ -119,8 +119,47 @@ def validate_reservoir(data_info, data_val, res_info, Wout, r_end, system_info):
     ## output
 
     control_info = {}
-    control_info['u_pred'] = u_pred.reshape(-1,system_info['num_inputs']);
-    control_info['u_val_flat'] = val_y.reshape(-1,system_info['num_inputs']);
+    control_info['u_pred'] = u_pred;
+    control_info['u_val_flat'] = val_y.T;
     
     return control_info
+
+def get_control_reservoir(data_info, x, x_ref, res_info, Wout, r_end, system_info):
+    ## read parameters
+    num_states = system_info['num_states'];
+    num_inputs = system_info['num_inputs'];
+    dt = data_info['dt'];
+
+    W_in = res_info['W_in'];
+    res_net = res_info['res_net'];
+    alpha = res_info['alpha'];
+    kb = res_info['kb'];
+    n = res_info['n'];
+
+
+    ## read data
+
+    r = r_end.reshape(n,1);
+
+    ## generate desired trajectory
+
+    val_x = np.hstack((np.hstack((np.hstack((x[:num_states],x_ref[:num_states])),x[num_states:])),x_ref[num_states:]))
+
+
+    ## validation
+
+    taudt_threshold = np.array([-1,1]);
+
+    # In each step, according to the predicted value, the system evolves
+    # according to its inherent rule.
+    r = (1-alpha)*r + alpha*np.tanh(np.matmul(res_net,r).reshape(-1,1) + np.matmul(W_in,val_x).reshape(-1,1)  + kb*np.ones((n,1)));
+    r_out = r;
+    r_out[1::2,0] = r_out[1::2,0]**2;#even number -> squared; ?????
+    predict_value = np.matmul(Wout,r_out);
+
+
+
+    u_pred = predict_value;
+    
+    return u_pred.reshape(num_inputs,)  
     

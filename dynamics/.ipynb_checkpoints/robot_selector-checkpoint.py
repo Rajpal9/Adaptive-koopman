@@ -29,6 +29,9 @@ def robot_selector(robot_name, params):
     
     elif robot_name == "5R_3D":
         robot = robot_5R_3D(params)
+
+    elif robot_name == "2R_2D":
+        robot = robot_2R_2D(params)
     else:
         print("Invalid Robot Name")
         return
@@ -37,6 +40,19 @@ def robot_selector(robot_name, params):
     return robot
     
     
+def robot_2R_2D(params):
+    m = params['m']
+    I = params['I']
+    l = params['l']
+    
+    
+    robot = rtb.robot.DHRobot([rtb.robot.DHLink(a = l, alpha = 0,  d = 0,theta = 0, r = [l/2,0,0], m = m, I = I  ),
+                               rtb.robot.DHLink(a = l, alpha = 0, d = 0, theta = 0, r = [l/2,0,0], m = m, I = I),               
+            ], name="2R_2D") 
+    
+    
+    return robot
+
 def robot_3R_2D(params):
     m = params['m']
     I = params['I']

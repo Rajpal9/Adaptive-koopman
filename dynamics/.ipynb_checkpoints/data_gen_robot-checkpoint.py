@@ -68,7 +68,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
             X[i,0,num_states:] = qd_traj[:,0];
 
             tf = np.array(robot.fkine(X[i,0,:num_states])); #fkine(q)
-            X_end[i,0,:] = tf[:num_states_cart,3];
+            X_end[i,0,:num_states_cart:] = tf[:num_states_cart,3];
             X_end[i,0,num_states_cart:] = np.matmul(robot.jacob0(X[i,0,:num_states])[:num_states_cart,:],X[i,0,num_states:].reshape(-1,))
 
             Kp = 16;
@@ -130,7 +130,7 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
             X_2[i,0,num_states:] = X_1[i,0,num_states:];
             
             tf_2 = np.array(robot_2.fkine(X_2[i,0,:num_states])); #fkine(q)
-            X_end_2[i,0,:] = tf_2[:num_states_cart,3];
+            X_end_2[i,0,:num_states_cart] = tf_2[:num_states_cart,3];
             X_end_2[i,0,num_states_cart:] = np.matmul(robot.jacob0(X_2[i,0,:num_states])[:num_states_cart,:],X_2[i,0,num_states:].reshape(-1,))
             
             for j in range(num_snaps-1):
