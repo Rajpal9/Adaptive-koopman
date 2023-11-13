@@ -103,16 +103,16 @@ def validate_reservoir(data_info, data_val, res_info, Wout, r_end, system_info):
         r_out[1::2,0] = r_out[1::2,0]**2;#even number -> squared; ?????
         predict_value = np.matmul(Wout,r_out);
 
-        if t_i == 1:
-            time_li = 1;
-        else:
-            time_li = t_i - 1;
+        # if t_i == 1:
+        #     time_li = 1;
+        # else:
+        #     time_li = t_i - 1;
 
-        for li in range(num_states):
-            if predict_value[li] - tau_pred[li, time_li] > taudt_threshold[1]*dt:
-                predict_value[li] = tau_pred[li, time_li] + taudt_threshold[1]*dt;
-            if predict_value[li] - tau_pred[li, time_li] < taudt_threshold[0]*dt:
-                predict_value[li] = tau_pred[li, time_li] + taudt_threshold[0]*dt;
+        # for li in range(num_states):
+        #     if predict_value[li] - tau_pred[li, time_li] > taudt_threshold[1]*dt:
+        #         predict_value[li] = tau_pred[li, time_li] + taudt_threshold[1]*dt;
+        #     if predict_value[li] - tau_pred[li, time_li] < taudt_threshold[0]*dt:
+        #         predict_value[li] = tau_pred[li, time_li] + taudt_threshold[0]*dt;
 
         u_pred[t_i, :] = predict_value.reshape(system_info['num_inputs'],);
 
