@@ -36,6 +36,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
             for j in range(num_snaps-1):
                 tau[i,j,:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,); #input torques
 
+
                 th_ddot = robot.accel(X[i,j,:num_states], X[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
                 X[i,j+1,num_states:] = th_ddot*dt + X[i,j,num_states:];
                 X[i,j+1,:num_states] = X[i,j,num_states:]*dt + X[i,j,:num_states];
@@ -91,7 +92,7 @@ def data_gen_robot(dt,num_traj,num_snaps, robot, controller):
     return X_end, X, tau
 
 
-def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
+def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_changed, controller):
     
     """
     A function for generating the data for the two robot
@@ -136,6 +137,7 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
             for j in range(num_snaps-1):
                 tau[i,j,:] = 0.1*(2*np.random.rand(num_states,1) - 1).reshape(num_states,); #input torques
 
+
                 th_ddot_1 = robot.accel(X_1[i,j,:num_states], X_1[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
                 X_1[i,j+1,num_states:] = th_ddot_1*dt + X_1[i,j,num_states:];
                 X_1[i,j+1,:num_states] = X_1[i,j,num_states:]*dt + X_1[i,j,:num_states];
@@ -143,8 +145,20 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
                 tf_1 = np.array(robot.fkine(X_1[i,j+1,:num_states]));
                 X_end_1[i,j+1,:num_states_cart] = tf_1[:num_states_cart,3];
                 X_end_1[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,j+1,:num_states])[:num_states_cart,:],X_1[i,j+1,num_states:].reshape(-1,))
+
+
+                if robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'constant':
+                    tau_app = tau[i,j,:]/robot_pars_changed['SN']
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'gaussian':
+                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
+                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                    
+                else:
+                    tau_app = tau[i,j,:]
+    
                 
-                th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
+                th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau_app) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
@@ -204,7 +218,18 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, controller):
                 X_end_1[i,j+1,:num_states_cart] = tf_1[:num_states_cart,3];
                 X_end_1[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,j+1,:num_states])[:num_states_cart,:],X_1[i,j+1,num_states:].reshape(-1,))
 
-                th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau[i,j,:]) # forward dynamic(q, th, q_dot) 
+                if robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'constant':
+                    tau_app = tau[i,j,:]/robot_pars_changed['SN']
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'gaussian':
+                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
+                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                    
+                else:
+                    tau_app = tau[i,j,:]
+    
+                
+                th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau_app) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
