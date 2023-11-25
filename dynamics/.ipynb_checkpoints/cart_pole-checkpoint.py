@@ -16,13 +16,14 @@ def cart_pole_dyn(dt, x, F, pars):
     l = pars["l"]        # length of pendulum            
     g = 9.81             # acceleration of gravity
     I_p = m_p*(l**2)/12  # MOI of Pendulum
-    f_d = pars["f_d"]
+    f_p = pars["f_p"]    # pendulum friction
+    f_c = pars["f_c"]    # cart friction
     
     
     ## dynamics of the system
     den = m_p*(l**2)/(4*(m_c+m_p)*(I_p + (m_p*(l**2)/4)))
-    x_ddot =(den/(1+den))*g*np.cos(x[1])*np.sin(x[1]) - (m_p*l/(2*(m_c+m_p)))*((x[3]**2)*np.sin(x[1]) +f_d*x[3]*np.cos(x[1]))+  F/(m_c + m_p)
-    th_ddot = m_p*(l/2)*(g*np.sin(x[1])-x_ddot*np.cos(x[1]))/(I_p + m_p*((l/2)**2)) - f_d*x[3]
+    x_ddot =(den/(1+den))*g*np.cos(x[1])*np.sin(x[1]) - (m_p*l/(2*(m_c+m_p)))*((x[3]**2)*np.sin(x[1]) +(f_p*x[3]/m_p)*np.cos(x[1]))+  (F-f_c*x[1])/(m_c + m_p)
+    th_ddot = m_p*(l/2)*(g*np.sin(x[1])-x_ddot*np.cos(x[1]))/(I_p + m_p*((l/2)**2)) - f_p*x[3]/m_p
                                                               
     x_d_next = x_ddot*dt + x[2]
     x_next = (1/2)*x_ddot*(dt**2) + x[2]*dt + x[0]

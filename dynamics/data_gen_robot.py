@@ -153,6 +153,8 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
                     tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
                     tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'sinosiodal':
+                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN']
                     
                 else:
                     tau_app = tau[i,j,:]
@@ -224,6 +226,8 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
                     tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
                     tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'sinosiodal':
+                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN']
                     
                 else:
                     tau_app = tau[i,j,:]
