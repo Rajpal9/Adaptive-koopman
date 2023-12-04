@@ -37,9 +37,14 @@ class AdaptNet_linear(nn.Module):
         # actuation
         self.del_B = nn.Linear(m, self.n_tot-first_obs_const, bias = False)
         
-        if self.adapt_net_params[]
-        nn.init.zeros_(self.del_A.weight)
-        nn.init.zeros_(self.del_B.weight)
+        if self.adapt_net_params['warm_start'] == True:
+            del_A_prev = torch.from_numpy(self.adapt_net_params['del_A_prev'][int(first_obs_const):,:])
+            del_B_prev = torch.from_numpy(self.adapt_net_params['del_B_prev'][int(first_obs_const):,:])
+            self.del_A.weight = nn.Parameter(del_A_prev)
+            self.del_B.weight = nn.Parameter(del_B_prev)
+        else:
+            nn.init.zeros_(self.del_A.weight)
+            nn.init.zeros_(self.del_B.weight)
         
 
 
