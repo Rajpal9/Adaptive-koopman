@@ -99,6 +99,7 @@ def cart_pole_data_gen(dt,num_traj,num_snaps, pars,controller):
                     X[i,0,1] = (np.pi/2)*(2*np.random.rand(1,) - 1)
                     X[i,0,2] = 0.1*(2*np.random.rand(1,) - 1)
                     X[i,0,3] = 0.1*(2*np.random.rand(1,) - 1)
+                    q_wp[:,s] = X[i,0,:2]
                     t_wp[s] = 0;
                     q_wp_dot = 0.07*(2*np.random.rand(num_states,) - 1);
                 else:

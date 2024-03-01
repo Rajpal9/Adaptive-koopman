@@ -22,8 +22,8 @@ def cart_pole_dyn(dt, x, F, pars):
     
     ## dynamics of the system
     den = m_p*(l**2)/(4*(m_c+m_p)*(I_p + (m_p*(l**2)/4)))
-    x_ddot =(den/(1+den))*g*np.cos(x[1])*np.sin(x[1]) - (m_p*l/(2*(m_c+m_p)))*((x[3]**2)*np.sin(x[1]) +(f_p*x[3]/m_p)*np.cos(x[1]))+  (F-f_c*x[1])/(m_c + m_p)
-    th_ddot = m_p*(l/2)*(g*np.sin(x[1])-x_ddot*np.cos(x[1]))/(I_p + m_p*((l/2)**2)) - f_p*x[3]/m_p
+    x_ddot =(den/(1+den))*g*np.cos(x[1])*np.sin(x[1]) - (m_p*l/(2*(m_c+m_p)))*((x[3]**2)*np.sin(x[1]) +f_p*x[3]*np.cos(x[1]))+  (F-f_c*x[1])/(m_c + m_p)
+    th_ddot = m_p*(l/2)*(g*np.sin(x[1])-x_ddot*np.cos(x[1]))/(I_p + m_p*((l/2)**2)) - f_p*x[3]
                                                               
     x_d_next = x_ddot*dt + x[2]
     x_next = (1/2)*x_ddot*(dt**2) + x[2]*dt + x[0]
@@ -99,6 +99,7 @@ def cart_pole_data_gen(dt,num_traj,num_snaps, pars,controller):
                     X[i,0,1] = (np.pi/2)*(2*np.random.rand(1,) - 1)
                     X[i,0,2] = 0.1*(2*np.random.rand(1,) - 1)
                     X[i,0,3] = 0.1*(2*np.random.rand(1,) - 1)
+                    q_wp[:,s] = X[i,0,:2]
                     t_wp[s] = 0;
                     q_wp_dot = 0.07*(2*np.random.rand(num_states,) - 1);
                 else:
