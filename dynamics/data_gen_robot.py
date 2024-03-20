@@ -148,13 +148,13 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
 
 
                 if robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'constant':
-                    tau_app = tau[i,j,:]/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:]*(1 + 1/robot_pars_changed['SN_input'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'gaussian':
-                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
+                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN_input'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
-                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN_input']
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'sinosiodal':
-                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN_input']
                     
                 else:
                     tau_app = tau[i,j,:]
@@ -162,6 +162,16 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
                 
                 th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau_app) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
+
+                if robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'constant':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:]*(1 + 1/robot_pars_changed['SN_state'])
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'gaussian':
+                    X_2[i,j+1,num_states:] = np.random.normal(loc = X_2[i,j+1,num_states:],scale = 1/robot_pars_changed['SN_state'])
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'random':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:] + (2*np.random.rand(X_2[i,j+1,num_states:].shape[0])-1)/robot_pars_changed['SN_input']
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'sinosiodal':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN_noise']
+                
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
                 tf_2 = np.array(robot_2.fkine(X_2[i,j+1,:num_states]));
@@ -221,13 +231,13 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
                 X_end_1[i,j+1,num_states_cart:] = np.matmul(robot.jacob0(X_1[i,j+1,:num_states])[:num_states_cart,:],X_1[i,j+1,num_states:].reshape(-1,))
 
                 if robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'constant':
-                    tau_app = tau[i,j,:]/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:](1+1/robot_pars_changed['SN_input'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'gaussian':
-                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN'])
+                    tau_app = np.random.normal(loc = tau[i,j,:],scale = 1/robot_pars_changed['SN_input'])
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'random':
-                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:] + (2*np.random.rand(tau[i,j,:].shape[0])-1)/robot_pars_changed['SN_input']
                 elif robot_pars_changed ['ext_torque'] and robot_pars_changed ['ext_torque_type'] == 'sinosiodal':
-                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN']
+                    tau_app = tau[i,j,:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN_input']
                     
                 else:
                     tau_app = tau[i,j,:]
@@ -235,6 +245,15 @@ def data_gen_robot_multi(dt,num_traj,num_snaps, robot, robot_2, robot_pars_chang
                 
                 th_ddot_2 = robot_2.accel(X_2[i,j,:num_states], X_2[i,j,num_states:], tau_app) # forward dynamic(q, th, q_dot) 
                 X_2[i,j+1,num_states:] = th_ddot_2*dt + X_2[i,j,num_states:];
+                if robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'constant':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:]*(1 + 1/robot_pars_changed['SN_state'])
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'gaussian':
+                    X_2[i,j+1,num_states:] = np.random.normal(loc = X_2[i,j+1,num_states:],scale = 1/robot_pars_changed['SN_state'])
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'random':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:] + (2*np.random.rand(X_2[i,j+1,num_states:].shape[0])-1)/robot_pars_changed['SN_input']
+                elif robot_pars_changed ['state_noise'] and robot_pars_changed ['state_noise_type'] == 'sinosiodal':
+                    X_2[i,j+1,num_states:] = X_2[i,j+1,num_states:] + np.sin(200*np.pi*j*dt)/robot_pars_changed['SN_noise']
+                
                 X_2[i,j+1,:num_states] = X_2[i,j,num_states:]*dt + X_2[i,j,:num_states];
 
                 tf_2 = np.array(robot_2.fkine(X_2[i,j+1,:num_states]));
