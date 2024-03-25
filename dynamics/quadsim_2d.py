@@ -66,8 +66,8 @@ class QuadSim(gym.Env):
     def get_action(self):
         return self.F, self.M
 
-    def get_thr_input(self, Thr, Mom):
-        return 0.5*(Thr - Mom/self.L), 0.5*(Thr + Mom/self.L)
+    def get_thr_input(self):
+        return 0.5*(self.F - self.M /self.L), 0.5*(self.F + self.M/self.L)
         
             
     
@@ -127,6 +127,12 @@ class QuadSim(gym.Env):
         kp_z = 300
         kp_y = 300
         kp_phi = 2500
+
+        # kp_z = 10
+        # kp_y = 8
+        # kp_phi = 2
+        
+        
         
         kd_phi = 2*np.sqrt(kp_phi)
         kd_y = 2*np.sqrt(kp_y)
