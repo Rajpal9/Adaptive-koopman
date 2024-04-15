@@ -11,13 +11,12 @@ from dynamics.quadrotor_2d import Quadrotor
 #import controller_2d
 import random
 from control import lqr
-from dynamics.TrajGen import trajGenerator, Helix_waypoints,line,random_traj_2d, lemniscate
+from dynamics.TrajGen import trajGenerator, Helix_waypoints,line,random_traj_2d, lemniscate, Circle_waypoints, adobe, star
 
 import time
 
 class QuadSim(gym.Env):
     def __init__(self, params):
-
         waypoints = random_traj_2d(np.append(np.array([0]), np.array([random.uniform(-2,2), random.uniform(-2,2)])), 2)#lemniscate()#line()#Helix_waypoints(5)#line()
         #waypoints = random_traj_2d(np.append(np.array([0]), np.array(random.sample(range(-10,10),2))), 1) #line()
 
@@ -299,10 +298,27 @@ class QuadSim(gym.Env):
 
 
 
-    def reset(self):
+    def reset(self, traj = 'random'):
         self.t = 0
         self.ep_len = 0
-        waypoints = random_traj_2d(np.append(np.array([0]), np.array([random.uniform(-2,2), random.uniform(-2,2)])), 3)#lemniscate()#line()#Helix_waypoints(5)#
+        if traj == 'random':
+            waypoints = random_traj_2d(np.append(np.array([0]), np.array([random.uniform(-2,2), random.uniform(-2,2)])), 3)
+        elif traj == 'lemniscate':
+            waypoints = lemniscate()   #line()##
+        elif traj == 'line':
+            waypoints = line()
+        elif traj == 'S':
+            waypoints = Helix_waypoints(5)
+        elif traj == 'circle':
+            waypoints = Circle_waypoints(10)
+        elif traj == 'adobe':
+            waypoints = adobe(15)
+        elif traj == 'star':
+            waypoints = star(30)
+        
+        
+        
+            
         #waypoints = random_traj_2d(np.append(np.array([0]), np.array(random.sample(range(-10,10),2))), 1) #line()
 
         #Generate trajectory through waypoints

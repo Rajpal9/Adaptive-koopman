@@ -26,6 +26,9 @@ class Quadrotor:
         self.Ixx = params['Ixx']
         self.g = params["g"]
         self.L = params["L"]
+        self.V_w = params["V_w"] #wind speed
+        self.alpha_w = params["alpha_w"] # wind_angle
+        self.C_d = 0.05 # coeffecient of drag
         
         self.ode = integrate.ode(self.state_dot).set_integrator('vode',nsteps=500,method='bdf')
 
@@ -77,9 +80,9 @@ class Quadrotor:
         #pqrdot = params.invI.dot( M.flatten() - np.cross(omega, params.I.dot(omega)) )
         #print("Angular acc using moment",pqrdot)
         
-        ydotdot, zdotdot, theta_dotdot = np.array([0, -self.g, 0]).T  + np.dot(np.array([[-np.sin(theta)/self.m, -np.sin(theta)/self.m],
+        ydotdot, zdotdot, theta_dotdot = np.array([0, -self.g, 0]).T  + np.array([self.C_d*(self.V_w**2)*np.sin(self.alpha_w),self.C_d*(self.V_w**2)*np.cos(self.alpha_w), 0]).T + np.dot(np.array([[-np.sin(theta)/self.m, -np.sin(theta)/self.m],
         																[np.cos(theta)/self.m,     np.cos(theta)/self.m],
-        																[-self.L/self.Ixx, self.L/self.Ixx]]), np.array([t1,t2]).T)
+        																[-self.L/self.Ixx, self.L/self.Ixx]]), np.array([t1,t2]).T) 
         state_dot = np.zeros(6)
         state_dot[0]  = ydot#xdot
         state_dot[1]  = zdot#ydot

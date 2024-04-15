@@ -28,25 +28,26 @@ def Hessian(T,order = 10,opt = 4):
 
 def Circle_waypoints(n,Tmax = 2*np.pi):
     t = np.linspace(0,Tmax, n)
-    x = 1+0.5*np.cos(t)
-    y = 1+0.5*np.sin(t)
-    z = 1+0*t
+    x = 1+0*t
+    y = 0+2*np.cos(t)
+    z = 0+2*np.sin(t)
+    
     return np.stack((x, y, z), axis=-1)
 
 def Helix_waypoints(n,Tmax = 2*np.pi):
 
     t = np.linspace(0, Tmax, n)
-    x = 1+0.5*np.cos(t)
-    y = 1+0.5*np.sin(t)
+    x = 0+2*np.cos(t)
+    y = 0+2*np.sin(t)
     z = t/Tmax*2
 
     return np.stack((x, y, z), axis=-1)
 
 def line():
     #t = np.linspace(0, Tmax, 2)
-    x = np.linspace(0, 1, 2)
-    y = np.linspace(0, 1, 2)
-    z = np.linspace(0, 1, 2)
+    x = np.linspace(0, 10, 10)
+    y = np.linspace(0, 10, 10)
+    z = np.linspace(0, 10, 10)
 
     return np.stack((x, y, z), axis=-1)
 
@@ -68,5 +69,28 @@ def random_traj_2d(init_pos, N):
     
 def lemniscate():
     pts = np.array([[0,0,0],[0,1,1],[0,2,0],[0,1,-1],[0,0,0],[0,-1,1],[0,-2,0],[0,-1,-1],[0,0,0]])
-    return pts       
+    return pts      
+
+def lemniscate_2d():
+    pts = np.array([[0,0],[1,1],[2,0],[1,-1],[0,0],[-1,1],[-2,0],[-1,-1],[0,0]])
+    return pts 
+
+def adobe(n,Tmax = 2*np.pi):
+    c = 0.3
+    t = np.linspace(0,Tmax, n)
+    x = 1+0*t
+    y = 0 + 2*c*np.sin(2*t) - 3*c*np.sin(t)
+    z = 0 + 2*c*np.cos(2*t) + 3*c*np.cos(t) - 5*c
     
+    return np.stack((x, y, z), axis=-1)
+
+def star(n,Tmax = 2*np.pi):
+    c = 0.5
+    t = np.linspace(0,Tmax, n)
+    x = 1+0*t
+    y = 0 + 2*c*np.cos(3*t) - 2*c*np.sin(2*t)
+    z = 0 + 2*c*np.cos(3*t) + 2*c*np.cos(2*t) - 3*c
+    
+    return np.stack((x, y, z), axis=-1)
+
+
