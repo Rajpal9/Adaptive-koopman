@@ -1,6 +1,5 @@
 This the code repository for the paper titled "Adaptive Koopman Architectures for Control of Uncertian Systems". The paper can be found at
-The discovery of linear embedding is the key to the synthesis of linear control techniques for nonlinear systems. In recent years, Koopman operator theory has become a prominent approach for learning these linear embeddings through data-driven methods. Despite the remarkable capabilities of Koopman-based algorithms for data-driven modeling, existing algorithms often exhibit limitations in generalizability beyond the distribution captured by training data and are not robust to changes in the nominal system dynamics induced by intrinsic or environmental factors. To overcome these limitations, this study presents an adaptive Koopman algorithm capable of responding to the changes in system dynamics online. The proposed framework initially employs an autoencoder-based neural network which utilizes input-output information from the nominal system to learn the corresponding Koopman embedding offline. Subsequently, we augment this nominal Koopman architecture with a feed-forward neural network that learns to modify the nominal dynamics in response to any deviation between the predicted and observed lifted states, leading to improved generalization and robustness to a wide range of uncertainties and disturbances as compared to contemporary methods. The proposed architecture is integrated within a Model Predictive Control (MPC) framework to enable optimal control of the underlying nonlinear system in the presence of uncertainties. The architecture of the proposed architecture is given as
-
+This study presents an adaptive Koopman algorithm capable of responding to the changes in system dynamics online. The proposed framework initially employs an autoencoder-based neural network which utilizes input-output information from the nominal system to learn the corresponding Koopman embedding offline. Subsequently, we augment this nominal Koopman architecture with a feed-forward neural network that learns to modify the nominal dynamics in response to any deviation between the predicted and observed lifted states, leading to improved generalization and robustness to a wide range of uncertainties and disturbances as compared to contemporary methods. The architecture of the proposed Koopman model is given as
 
 ![adaptive_koopman_framework_updated](https://github.com/Rajpal9/Adaptive-koopman/assets/90927685/fc2c633f-c1fb-43ff-a83a-b70ed1ff5517)
 
@@ -9,5 +8,8 @@ The proposed adaptive Koopman architecture is integrated within a Model Predicti
 ![adaptation_block](https://github.com/Rajpal9/Adaptive-koopman/assets/90927685/9bcaec27-a618-40e6-bb59-6771908c5ec1)
 
 Through extensive tracking control simulations across a diverse range of nonlinear systems, we demonstrate the effectiveness of our proposed framework and highlight its robustness against measurement noise, disturbances, and parametric variations in system dynamics.
+Results for 3R serial manipulator:
 ![manip_reults](https://github.com/Rajpal9/Adaptive-koopman/assets/90927685/c5cb73f6-64c4-4db9-b5a2-3c7ce0d9975c)
+
+Results for a planar quadrotor:
 ![quad_results_with_wind_gusts_comp_with_wind_graphics](https://github.com/Rajpal9/Adaptive-koopman/assets/90927685/85010e55-a58f-4313-a89e-d85fd4b6c472)
