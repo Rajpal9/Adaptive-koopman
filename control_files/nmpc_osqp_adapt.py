@@ -249,8 +249,8 @@ class NonlinearMPCController():
         :return:
         """
         self._osqp_q[:self.nz * (self.N + 1) + self.nu * self.N] = np.hstack(
-            [(self.C.T @ self.Q @ (self.x_init[:, :-1] - xr.reshape(-1, 1))).flatten(order='F'),
-             self.C.T @ self.QN @ (self.x_init[:, -1] - xr),
+            [(self.C.T @ self.Q @ (self.x_init[:, :-1] - xr[:,:-1])).flatten(order='F'),
+             self.C.T @ self.QN @ (self.x_init[:, -1] - xr[:,-1]),
              (self.R @ (self.u_init.T)).flatten(order='F')])
 
 
